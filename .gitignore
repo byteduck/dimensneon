@@ -1,0 +1,4 @@
+.idea/
+venv/
+dimensneon.egg-info/
+tests/data/
