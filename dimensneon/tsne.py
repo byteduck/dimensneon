@@ -21,7 +21,14 @@ They have played us for absolute fools
 # https://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf
 
 
-def tsne(data: anndata.AnnData, perplexity=30.0):
+def tsne(data: anndata.AnnData, perplexity=30.0, iterations=1000):
+    """
+    Runs t-SNE on the given AnnData object.
+    The t-SNE data will be embedded into the object.
+    :param data: The AnnData object to run t-SNE on. Shape must be square.
+    :param perplexity: The perplexity to use for the simulation.
+    :param iterations: The number of iterations to run.
+    """
     # The "X_pca" frame in our anndata object has our PCA data.
     X = data.obsm['X_pca']
     (n, dims) = X.shape
@@ -32,8 +39,32 @@ def tsne(data: anndata.AnnData, perplexity=30.0):
 
     # Create an output array for the resultant 2-D points for our t-SNE plot. Start with random points
     Y = np.random.randn(n, 2)
+    momentum_Y = np.zeros((n, 2))
+    gains = np.ones((n, 2))
+    MOMENTUM = 0.6
 
-    # Run iterations of the simulation! TODO
+    for iter in range(iterations):
+        if iter % 10 == 0:
+            print(f"Running simulation (iteration {iter}/{iterations})...", end='\r')
+
+        # First, calculate q_{i,j} matrix. (Equation 4)
+        dists_inv = 1 / (1 + squared_distances(Y))
+        Q = dists_inv / np.sum(dists_inv)
+
+        # Now, it's gradient descent time!
+        # Calculate the derivative of the Kullback-Leibler divergence between the probabilities (Equation 5)
+        # (This is essentially just the c Y for each point)
+        P_minus_Q = P - Q
+        delta_momentum = np.zeros((n, 2))
+        for i in range(n):
+            delta_momentum[i] = np.sum(np.tile(P_minus_Q[:, i] * dists_inv[:, i], (2, 1)).transpose() * (Y[i] - Y), 0)
+
+        # Update the momentum of each point with our deltas in momentum
+        # (We multiply delta_momentum by a large value to make the simulation a bit faster..)
+        momentum_Y = MOMENTUM * momentum_Y - 250 * delta_momentum
+        Y += momentum_Y
+
+    print(f"Running simulation (iteration {iterations}/{iterations})... Done!")
 
     # Finally, store the output in the "X_tsne" frame so that scanpy can plot it
     data.obsm['X_tsne'] = Y
@@ -75,8 +106,8 @@ def perplexity_probs(squared_dists, variance=1.0):
 
     # Calculate the probability that each point chooses any other point as its neighbor, or p_{i,j}.
     # In other words, the probability based on a gaussian distribution at p_i at p_j with the given variance
-    probs = np.exp(-squared_dists * variance)
-    sum_probs = sum(probs)
+    probs = np.exp(-squared_dists.copy() * variance)
+    sum_probs = np.sum(probs) +  1e-15 # Avoid nonzero values
 
     # Normalize probs for perplexity
     norm_probs = probs / sum_probs
@@ -149,4 +180,8 @@ def calculate_probability_matrix(X = np.array([[]]), perplexity = 30.0):
     # Finally, normalize the probability matrix
     prob_matrix = prob_matrix + prob_matrix.transpose()
     prob_matrix = prob_matrix / np.sum(prob_matrix)
+
+    # As suggested by the paper, multiply all probabilities by 4 for "early exaggeration"
+    prob_matrix *= 4
+
     return prob_matrix
