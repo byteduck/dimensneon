@@ -4,7 +4,7 @@ setup(
     name='dimensneon',
     packages=find_packages(include=['dimensneon']),
     version='0.0.1',
-    description='A small tool for running t-SNE visualization on 10x scRNA-seq matrices',
+    description='A drop-in replacement for scanpy\'s t-SNE simulation functionality',
     author='Aaron Sonin',
     license='MIT',
     install_requires=['scanpy', 'leidenalg'],
