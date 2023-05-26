@@ -17,6 +17,12 @@ You can then install the library by running:
 python setup.py install
 ```
 
+If you do not have permissions to install packages globally (you are on DataHub, for instance), add the `--user` flag:
+
+```shell
+python setup.py install --user
+```
+
 ## Basic usage
 
 dimenSNEon is a drop-in replacement for scanpy's t-SNE simulation functionality. You can import the library in your script by using:
@@ -40,6 +46,12 @@ dimenSNEon allows you to tweak aspects of the simulation by supplying optional a
 
 - `perplexity` (`float`, default = `30.0`): The perplexity value to target for the t-SNE simulation.
 - `iterations` (`int`, default = `1000`): The number of iterations of the simulation to run.
+
+## Testing
+
+A test notebook is provided in this repository under the `tests` directory, where you can test dimenSNEon on a subset of the 10x scRNA sample data from 10x genomics.
+
+If you wish to run tests on different data, simply change `DATADIR` at the top of the notebook to point to another directory with scRNA-seq `barcodes.tsv.gz`, `features.tsv.gz`, and `matrix.mtx.gz` files.
 
 ## Credits
 
