@@ -1,22 +1,6 @@
 import anndata
 import numpy as np
 
-"""
-- STOP DOING t-SNE
-- DATA WERE NOT SUPPOSED TO HAVE MORE THAN 2 DIMENSIONS
-- YEARS of simulations YET NO REAL-WORLD USE for anything more than DOT PLOTS
-- Wanted to add more dimensions anyway for a laugh? We had a tool for that: It was called "MAKE ANOTHER GRAPH"
-- "Yes, please give me the normalized perplexity values of these Euclidean distances. Please give me the Shannon entropy
-  of the data" - Statements dreamed up by the Utterly Deranged
-  
-LOOK at what machine learning experts have been demanding your Respect for all this time, with all the GPUs and
-computers we built for them
-
-(This is REAL t-SNE, done by REAL Bioinformaticians)
-
-They have played us for absolute fools
-"""
-
 # Based on the paper "Visualizing Data using t-SNE" by Laurens van der Maaten and Geoffrey Hinton
 # https://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf
 
@@ -185,3 +169,20 @@ def calculate_probability_matrix(X = np.array([[]]), perplexity = 30.0):
     prob_matrix *= 4
 
     return prob_matrix
+
+
+"""
+- STOP DOING t-SNE
+- DATA WERE NOT SUPPOSED TO HAVE MORE THAN 2 DIMENSIONS
+- YEARS of simulations YET NO REAL-WORLD USE for anything more than TWO AXES
+- Wanted to see more dimensions anyway for a laugh? We had a tool for that: It was called "MAKE ANOTHER GRAPH"
+- "Yes, please give me the normalized perplexity values of these Euclidean distances. Please perform PCA on these
+   n-dimensional data." - Statements dreamed up by the Utterly Deranged
+
+LOOK at what machine learning experts have been demanding your Respect for all this time, with all the GPUs and
+computers we built for them
+
+(This is REAL t-SNE, done by REAL Bioinformaticians)
+
+They have played us for absolute fools
+"""
