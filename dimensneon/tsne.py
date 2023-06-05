@@ -63,6 +63,10 @@ def tsne(data: anndata.AnnData, perplexity=30.0, iterations=1000):
     # Finally, store the output in the "X_tsne" frame so that scanpy can plot it
     data.obsm['X_tsne'] = Y
 
+    print("🎵 Now, these points of data make a beautiful line 🎵")
+    print("🎵 And we're out of beta, we're releasing on time! 🎵")
+    print("Finished!")
+
 
 def squared_distances(X = np.array([[]])):
     """
