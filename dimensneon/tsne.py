@@ -21,12 +21,14 @@ def tsne(data: anndata.AnnData, perplexity=30.0, iterations=1000):
     # First, calculate the probability matrix for our data.
     # (That is, how likely it is for each point to interact with every other point)
     P = calculate_probability_matrix(X, perplexity)
+    # As suggested by the paper, use "early exaggeration" for the first 250 iterations
+    early_P = P * 12
 
     # Create an output array for the resultant 2-D points for our t-SNE plot. Start with random points
     Y = np.random.randn(n, 2)
     momentum_Y = np.zeros((n, 2))
-    gains = np.ones((n, 2))
-    MOMENTUM = 0.6
+    learning_rates = np.ones((n, 2))
+    LEARNING_RATE = 200
 
     for iter in range(iterations):
         if iter % 10 == 0:
@@ -34,19 +36,26 @@ def tsne(data: anndata.AnnData, perplexity=30.0, iterations=1000):
 
         # First, calculate q_{i,j} matrix. (Equation 4)
         dists_inv = 1 / (1 + squared_distances(Y))
+        dists_inv[range(n), range(n)] = 0.0 # Every point should have a distance of zero to itself
         Q = dists_inv / np.sum(dists_inv)
 
         # Now, it's gradient descent time!
         # Calculate the derivative of the Kullback-Leibler divergence between the probabilities (Equation 5)
-        # (This is essentially just the c Y for each point)
-        P_minus_Q = P - Q
+        # (This is essentially just the change in momentum for each point)
+        P_minus_Q = (early_P if iter < 250 else P) - Q
         delta_momentum = np.zeros((n, 2))
         for i in range(n):
             delta_momentum[i] = np.sum(np.tile(P_minus_Q[:, i] * dists_inv[:, i], (2, 1)).transpose() * (Y[i] - Y), 0)
 
-        # Update the momentum of each point with our deltas in momentum
-        # (We multiply delta_momentum by a large value to make the simulation a bit faster..)
-        momentum_Y = MOMENTUM * momentum_Y - 250 * delta_momentum
+        # Where the momentum has increased, increase the learning rate. Where it's decreased, decrease it.
+        # This isn't the exact method described in the paper, but the paper it referenced was a little out of my depth.
+        # This seems to work as a nice approximation.
+        learning_rates[(delta_momentum > 0.) != (momentum_Y > 0.)] += 0.1
+        learning_rates[(delta_momentum > 0.) == (momentum_Y > 0.)] *= 0.9
+
+        # Update the momentum of each point with our deltas in momentum according to the equation on pg. 4.
+        alpha = 0.5 if iter < 250 else 0.8 # Alpha term of 0.5 for first 250 iterations, then 0.8 after
+        momentum_Y = alpha * momentum_Y - LEARNING_RATE * (learning_rates * delta_momentum)
         Y += momentum_Y
 
     print(f"Running simulation (iteration {iterations}/{iterations})... Done!")
@@ -92,7 +101,7 @@ def perplexity_probs(squared_dists, variance=1.0):
     # Calculate the probability that each point chooses any other point as its neighbor, or p_{i,j}.
     # In other words, the probability based on a gaussian distribution at p_i at p_j with the given variance
     probs = np.exp(-squared_dists.copy() * variance)
-    sum_probs = np.sum(probs) +  1e-15 # Avoid nonzero values
+    sum_probs = np.sum(probs) + 1e-15 # Avoid nonzero values
 
     # Normalize probs for perplexity
     norm_probs = probs / sum_probs
@@ -165,9 +174,6 @@ def calculate_probability_matrix(X = np.array([[]]), perplexity = 30.0):
     # Finally, normalize the probability matrix
     prob_matrix = prob_matrix + prob_matrix.transpose()
     prob_matrix = prob_matrix / np.sum(prob_matrix)
-
-    # As suggested by the paper, multiply all probabilities by 4 for "early exaggeration"
-    prob_matrix *= 4
 
     return prob_matrix
 
