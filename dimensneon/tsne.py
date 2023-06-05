@@ -3,13 +3,14 @@ import numpy as np
 
 # Based on the paper "Visualizing Data using t-SNE" by Laurens van der Maaten and Geoffrey Hinton
 # https://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf
+# The following file contains an implementation of t-SNE. See the `tsne` function for main functionality.
 
 
 def tsne(data: anndata.AnnData, perplexity=30.0, iterations=1000):
     """
     Runs t-SNE on the given AnnData object.
-    The t-SNE data will be embedded into the object.
-    :param data: The AnnData object to run t-SNE on. Shape must be square.
+    The t-SNE data will be embedded into the object in the frame "X_tsne".
+    :param data: The AnnData object to run t-SNE on. PCA must have already been run on this object.
     :param perplexity: The perplexity to use for the simulation.
     :param iterations: The number of iterations to run.
     """
