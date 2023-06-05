@@ -7,5 +7,5 @@ setup(
     description='A drop-in replacement for scanpy\'s t-SNE simulation functionality',
     author='Aaron Sonin',
     license='MIT',
-    install_requires=['scanpy', 'leidenalg'],
+    install_requires=['scanpy', 'leidenalg', 'scipy'],
 )

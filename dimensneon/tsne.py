@@ -1,5 +1,6 @@
 import anndata
 import numpy as np
+from scipy.spatial import distance
 
 # Based on the paper "Visualizing Data using t-SNE" by Laurens van der Maaten and Geoffrey Hinton
 # https://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf
@@ -75,9 +76,9 @@ def squared_distances(X = np.array([[]])):
     :return: A numpy array of each datapoint's squared Euclidean distance to every other datapoint.
     """
 
+    """
+    # I realized that scipy has a faster implementation of this, which I switched to. The original code is below.
     # sqrt(Σ(a-b)^2) = sqrt(Σ(a^2 - 2ab + b^2)).
-    # We could do this naively with a couple of for loops... But that would take forever.
-    # So, we can make this faster with some matrix math! (And assistance from numpy)
 
     # This is our a^2 & b^2 terms
     asquare = np.sum(np.square(X), 1)
@@ -90,8 +91,9 @@ def squared_distances(X = np.array([[]])):
 
     # Then finally, Σ((a^2-2ab) + b^2)
     squared_dists = np.add(diff, asquare)
+    """
 
-    return squared_dists
+    return distance.squareform(distance.pdist(X, "sqeuclidean"))
 
 
 def perplexity_probs(squared_dists, variance=1.0):
@@ -136,7 +138,7 @@ def calculate_probability_matrix(X = np.array([[]]), perplexity = 30.0):
     row_variance = np.ones((n, 1))
     for i in range(n):
         if i % 100 == 0:
-            print(f"Calculating variances ({i}/{n})...", end='\r')
+            print(f"Calculating joint probabilities ({i}/{n})...", end='\r')
 
         # We want to take out X[i][i] from the row, since it's always 0
         col_indices = np.concatenate((np.r_[0:i], np.r_[i+1:n]))
@@ -173,7 +175,7 @@ def calculate_probability_matrix(X = np.array([[]]), perplexity = 30.0):
                 else:
                     row_variance[i] = (row_variance[i] + min_var) / 2.0
         prob_matrix[i, col_indices] = row_probs
-    print(f"Calculating variances ({n}/{n})... Done!")
+    print(f"Calculating joint probabilities ({n}/{n})... Done!")
 
     # Finally, normalize the probability matrix
     prob_matrix = prob_matrix + prob_matrix.transpose()
