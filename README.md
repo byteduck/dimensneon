@@ -25,6 +25,8 @@ python setup.py install --user
 
 ## Basic usage
 
+**(See the *Testing* section for information on how to test dimenSNEon)**
+
 dimenSNEon is a drop-in replacement for scanpy's t-SNE simulation functionality. You can import the library in your script by using:
 
 ```python
@@ -66,7 +68,8 @@ Additional inspiration was drawn from sklearn and scanpy's t-SNE functionality.
 
 ## Sample Data
 
-The sample data downloaded by the tests in this repository are as follows:
+Sample data is not included in the repository directly due to the size of the data.
+The sample data downloaded by the test notebook in this repository are as follows:
 
 - [10x scRNA sample data v3.0.0](https://support.10xgenomics.com/single-cell-gene-expression/datasets/3.0.0/pbmc_10k_v3?)
 - [10x scRNA data from Functional, metabolic and transcriptional maturation of human pancreatic islets derived from stem cells](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE167880)
