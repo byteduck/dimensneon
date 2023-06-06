@@ -35,10 +35,11 @@ def tsne(data: anndata.AnnData, perplexity=30.0, iterations=1000, animate=False)
 
     for iter in range(iterations):
         if iter % 10 == 0:
-            # If we're animating, we'll want to save the datapoints' positions every 10 iterations so we can return
-            # them. This was used for making a GIF for my presentation
-            Ys.append(Y.copy())
             print(f"Running simulation (iteration {iter}/{iterations})...", end='\r')
+
+        # If we're animating, we'll want to save the datapoints' positions so we can return
+        # them. This was used for making a GIF for my presentation
+        Ys.append(Y.copy())
 
         # First, calculate q_{i,j} matrix. (Equation 4)
         dists_inv = 1 / (1 + squared_distances(Y))
