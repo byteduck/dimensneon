@@ -3,4 +3,5 @@ venv/
 dimensneon.egg-info/
 tests/data/
 tests/cache/
+tests/figures
 dimensneon/__pycache__/

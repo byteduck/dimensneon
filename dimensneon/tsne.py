@@ -7,13 +7,14 @@ from scipy.spatial import distance
 # The following file contains an implementation of t-SNE. See the `tsne` function for main functionality.
 
 
-def tsne(data: anndata.AnnData, perplexity=30.0, iterations=1000):
+def tsne(data: anndata.AnnData, perplexity=30.0, iterations=1000, animate=False):
     """
     Runs t-SNE on the given AnnData object.
     The t-SNE data will be embedded into the object in the frame "X_tsne".
     :param data: The AnnData object to run t-SNE on. PCA must have already been run on this object.
     :param perplexity: The perplexity to use for the simulation.
     :param iterations: The number of iterations to run.
+    :param animate: Whether to store the datapoints as the simulation iterates for visualization purposes.
     """
     # The "X_pca" frame in our anndata object has our PCA data.
     X = data.obsm['X_pca']
@@ -22,17 +23,21 @@ def tsne(data: anndata.AnnData, perplexity=30.0, iterations=1000):
     # First, calculate the probability matrix for our data.
     # (That is, how likely it is for each point to interact with every other point)
     P = calculate_probability_matrix(X, perplexity)
-    # As suggested by the paper, use "early exaggeration" for the first 250 iterations
-    early_P = P * 12
+    # As suggested by the paper, use "early exaggeration" for the first 1/4 iterations
+    early_P = P * 4
 
     # Create an output array for the resultant 2-D points for our t-SNE plot. Start with random points
     Y = np.random.randn(n, 2)
+    Ys = []
     momentum_Y = np.zeros((n, 2))
     learning_rates = np.ones((n, 2))
     LEARNING_RATE = 200
 
     for iter in range(iterations):
         if iter % 10 == 0:
+            # If we're animating, we'll want to save the datapoints' positions every 10 iterations so we can return
+            # them. This was used for making a GIF for my presentation
+            Ys.append(Y.copy())
             print(f"Running simulation (iteration {iter}/{iterations})...", end='\r')
 
         # First, calculate q_{i,j} matrix. (Equation 4)
@@ -43,7 +48,7 @@ def tsne(data: anndata.AnnData, perplexity=30.0, iterations=1000):
         # Now, it's gradient descent time!
         # Calculate the derivative of the Kullback-Leibler divergence between the probabilities (Equation 5)
         # (This is essentially just the change in momentum for each point)
-        P_minus_Q = (early_P if iter < 250 else P) - Q
+        P_minus_Q = (early_P if iter < int(iterations * 0.25) else P) - Q
         delta_momentum = np.zeros((n, 2))
         for i in range(n):
             delta_momentum[i] = np.sum(np.tile(P_minus_Q[:, i] * dists_inv[:, i], (2, 1)).transpose() * (Y[i] - Y), 0)
@@ -67,6 +72,9 @@ def tsne(data: anndata.AnnData, perplexity=30.0, iterations=1000):
     print("🎵 Now, these points of data make a beautiful line 🎵")
     print("🎵 And we're out of beta, we're releasing on time! 🎵")
     print("Finished!")
+
+    if animate:
+        return Ys
 
 
 def squared_distances(X = np.array([[]])):
