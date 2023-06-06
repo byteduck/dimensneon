@@ -8,7 +8,7 @@ It is mainly intended for use in 10x scRNA-seq workflows, although it will theor
 Installation requires the `scanpy` and `scipy` libraries to be installed (and `leidenalg` as well for tests). You can install these using the following command (However, `setup.py` should install all required dependencies for you):
 
 ```shell
-pip install scanpy leidenalg
+pip install scanpy scipy leidenalg
 ```
 
 You can then install the library by running:
