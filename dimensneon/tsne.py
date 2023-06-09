@@ -52,7 +52,8 @@ def tsne(data: anndata.AnnData, perplexity=30.0, iterations=1000, animate=False)
         P_minus_Q = (early_P if iter < int(iterations * 0.25) else P) - Q
         delta_momentum = np.zeros((n, 2))
         for i in range(n):
-            delta_momentum[i] = np.sum(np.tile(P_minus_Q[:, i] * dists_inv[:, i], (2, 1)).transpose() * (Y[i] - Y), 0)
+            PQ_times_dist = np.tile(P_minus_Q[:, i] * dists_inv[:, i], (2, 1)).transpose()
+            delta_momentum[i] = np.sum(PQ_times_dist * (Y[i] - Y), 0)
 
         # Where the momentum has increased, increase the learning rate. Where it's decreased, decrease it.
         # This isn't the exact method described in the paper, but the paper it referenced was a little out of my depth.
@@ -121,7 +122,7 @@ def perplexity_probs(squared_dists, variance=1.0):
     # Normalize probs for perplexity
     norm_probs = probs / sum_probs
 
-    # Calculate Shannon H
+    # Calculate Perplexity of the row. We want to match this to the perplexity specified by the user
     perplexity = np.log(sum_probs) + variance * np.sum(squared_dists * probs) / sum_probs
 
     return perplexity, norm_probs
