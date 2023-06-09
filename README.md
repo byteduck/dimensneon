@@ -3,6 +3,10 @@ This python library that aims to act as a drop-in replacement for scanpy's t-SNE
 
 It is mainly intended for use in 10x scRNA-seq workflows, although it will theoretically work with any compatible AnnData structure.
 
+![simulation_example.gif](simulation_example.gif)
+
+*An animation of dimenSNEon running on the 10x Genomics sample scRNA-seq data.*
+
 ## Installation instructions
 
 Installation requires the `scanpy` and `scipy` libraries to be installed (and `leidenalg` as well for tests). You can install these using the following command (However, `setup.py` should install all required dependencies for you):
